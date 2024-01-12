@@ -54,7 +54,7 @@ func WriteHTTPError(w http.ResponseWriter, message string, statusCode int) {
 	json.NewEncoder(w).Encode(bodyMap)
 }
 
-func setCORSHeaders(w *http.ResponseWriter, allowMethods string) {
+func SetCORSHeaders(w *http.ResponseWriter, allowMethods string) {
 
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Methods", allowMethods)
@@ -63,7 +63,7 @@ func setCORSHeaders(w *http.ResponseWriter, allowMethods string) {
 	(*w).WriteHeader(http.StatusNoContent)
 }
 
-func getURLParameter(r *http.Request, queryKey string, defaultValue string) string {
+func GetURLParameter(r *http.Request, queryKey string, defaultValue string) string {
 	paramSlice, OK := r.URL.Query()[queryKey]
 	var param string
 	if !OK || len(paramSlice[0]) < 1 || paramSlice[0] == "" {

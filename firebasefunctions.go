@@ -32,7 +32,7 @@ var (
 )
 
 // GetFirestoreClient Get a new Firestore Client
-func getFirestoreAppAndClient() (*firebase.App, *firestore.Client, context.Context) {
+func GetFirestoreAppAndClient() (*firebase.App, *firestore.Client, context.Context) {
 
 	ctx := context.Background()
 	fireapp, err := firebase.NewApp(ctx, nil)
@@ -57,7 +57,7 @@ func GetSecret(ctx context.Context, keyName string) (string, error) {
 	var secretBytes []byte
 	// retry getting secret 2 times
 	for i := 0; i < 2; i++ {
-		secretBytes, err = getSecretRaw(ctx, keyName)
+		secretBytes, err = GetSecretRaw(ctx, keyName)
 		if err == nil {
 			return string(secretBytes), nil
 		}
@@ -66,9 +66,9 @@ func GetSecret(ctx context.Context, keyName string) (string, error) {
 	return "", err
 }
 
-// getSecretRaw returns a bytes array and error for a secret using Google's Secret Manager
+// GetSecretRaw returns a bytes array and error for a secret using Google's Secret Manager
 // It gets the latest version of the secret.
-func getSecretRaw(ctx context.Context, keyName string) ([]byte, error) {
+func GetSecretRaw(ctx context.Context, keyName string) ([]byte, error) {
 
 	name := "projects/" + os.Getenv("GCLOUD_PROJECT") + "/secrets/" + keyName + "/versions/latest"
 
@@ -91,7 +91,7 @@ func getSecretRaw(ctx context.Context, keyName string) ([]byte, error) {
 	return result.Payload.Data, nil
 }
 
-func checkFirebaseUserAuthorized(ctx context.Context, fireapp *firebase.App, fireclient *firestore.Client, r *http.Request) (*auth.Token, int) {
+func CheckFirebaseUserAuthorized(ctx context.Context, fireapp *firebase.App, fireclient *firestore.Client, r *http.Request) (*auth.Token, int) {
 	authHeader := r.Header.Get("Authorization")
 	//LogWrite(LogTypeInfo,0,authHeader)
 
@@ -125,8 +125,8 @@ func checkFirebaseUserAuthorized(ctx context.Context, fireapp *firebase.App, fir
 	return token, http.StatusOK
 }
 
-// firebaseDocumentIteratorWithRetry - gets firestore iterator with retries
-func firebaseDocumentIteratorWithRetry(iter *firestore.DocumentIterator) (*firestore.DocumentSnapshot, error) {
+// FirebaseDocumentIteratorWithRetry - gets firestore iterator with retries
+func FirebaseDocumentIteratorWithRetry(iter *firestore.DocumentIterator) (*firestore.DocumentSnapshot, error) {
 	firestoreRetriesNumber, err := strconv.Atoi(os.Getenv("FIRESTORE_RETRIES_NUMBER"))
 	if err != nil {
 		firestoreRetriesNumber = 1
@@ -157,8 +157,8 @@ func firebaseDocumentIteratorWithRetry(iter *firestore.DocumentIterator) (*fires
 	return nil, fmt.Errorf("Unsuccessful document iteration, Error: %v", err.Error())
 }
 
-// addEntityToFirestore - adds any entity to the firestore collection with retries
-func addEntityToFirestore(ctx context.Context, fireclient *firestore.Client, collectionName string, entity interface{}) (*firestore.DocumentRef, error) {
+// AddEntityToFirestore - adds any entity to the firestore collection with retries
+func AddEntityToFirestore(ctx context.Context, fireclient *firestore.Client, collectionName string, entity interface{}) (*firestore.DocumentRef, error) {
 	var docRef *firestore.DocumentRef
 
 	firestoreRetriesNumber, err := strconv.Atoi(os.Getenv("FIRESTORE_RETRIES_NUMBER"))
@@ -167,7 +167,7 @@ func addEntityToFirestore(ctx context.Context, fireclient *firestore.Client, col
 		LogWrite(LogTypeInfo, 0, fmt.Sprintf("FIRESTORE_RETRIES_NUMBER is missing, was set to: %v", firestoreRetriesNumber), "")
 	}
 
-	if !firestoreCollectionExists(collectionName) {
+	if !FirestoreCollectionExists(collectionName) {
 		return nil, fmt.Errorf("Collection name '%v' does not exist", collectionName)
 	}
 
@@ -179,7 +179,7 @@ func addEntityToFirestore(ctx context.Context, fireclient *firestore.Client, col
 
 		if err.Error() == ClosingTransportError {
 			//recreate fireclient connection
-			_, fireclient, err = getFirestoreAppAndClientWithContext(ctx)
+			_, fireclient, err = GetFirestoreAppAndClientWithContext(ctx)
 			if err != nil {
 				return nil, fmt.Errorf("Error updating fireclient (%d - retries left): %v", firestoreRetriesNumber-i, err.Error())
 			}
@@ -196,9 +196,9 @@ func addEntityToFirestore(ctx context.Context, fireclient *firestore.Client, col
 	return nil, fmt.Errorf("Exceed retries number for adding data to the '%v' collection, Error: %v", collectionName, err.Error())
 }
 
-// getEntityFromFirestore - gets any entity from the firestore collection with retries
+// GetEntityFromFirestore - gets any entity from the firestore collection with retries
 // getting only one by one
-func getEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, collectionName, entityID string) (*firestore.DocumentSnapshot, error) {
+func GetEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, collectionName, entityID string) (*firestore.DocumentSnapshot, error) {
 	var doc *firestore.DocumentSnapshot
 
 	firestoreRetriesNumber, err := strconv.Atoi(os.Getenv("FIRESTORE_RETRIES_NUMBER"))
@@ -210,7 +210,7 @@ func getEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, c
 	if entityID == "" {
 		return nil, errors.New("entity ID is required field for get")
 	}
-	if !firestoreCollectionExists(collectionName) {
+	if !FirestoreCollectionExists(collectionName) {
 		return nil, fmt.Errorf("document name '%v' does not exist", collectionName)
 	}
 
@@ -224,7 +224,7 @@ func getEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, c
 			LogWrite(LogTypeInfo, 0, fmt.Sprintf("failed to get data from the '%v' collection, Error: %v. Will do retry!", collectionName, err.Error()), "")
 
 			// recreate fireclient connection
-			_, fireclient, err = getFirestoreAppAndClientWithContext(ctx)
+			_, fireclient, err = GetFirestoreAppAndClientWithContext(ctx)
 			if err != nil {
 				return nil, fmt.Errorf("error updating fireclient (%d - retries left): %v", firestoreRetriesNumber-i, err.Error())
 			}
@@ -241,8 +241,8 @@ func getEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, c
 	return nil, fmt.Errorf("Exceed retries number for getting data from the '%v' collection, Error: %v", collectionName, err.Error())
 }
 
-// editEntityInFirestore - edits any entity in the firestore collection with retries
-func editEntityInFirestore(ctx context.Context, fireclient *firestore.Client, collectionName, entityID string, entity interface{}) error {
+// EditEntityInFirestore - edits any entity in the firestore collection with retries
+func EditEntityInFirestore(ctx context.Context, fireclient *firestore.Client, collectionName, entityID string, entity interface{}) error {
 	firestoreRetriesNumber, err := strconv.Atoi(os.Getenv("FIRESTORE_RETRIES_NUMBER"))
 	if err != nil {
 		firestoreRetriesNumber = 1
@@ -252,7 +252,7 @@ func editEntityInFirestore(ctx context.Context, fireclient *firestore.Client, co
 	if entityID == "" {
 		return errors.New("Entity ID is required field for edit")
 	}
-	if !firestoreCollectionExists(collectionName) {
+	if !FirestoreCollectionExists(collectionName) {
 		return fmt.Errorf("Document name '%v' does not exist", collectionName)
 	}
 
@@ -265,7 +265,7 @@ func editEntityInFirestore(ctx context.Context, fireclient *firestore.Client, co
 
 		if err.Error() == ClosingTransportError || strings.Contains(err.Error(), UnavailableServiceError) {
 			//recreate fireclient connection
-			_, fireclient, err = getFirestoreAppAndClientWithContext(ctx)
+			_, fireclient, err = GetFirestoreAppAndClientWithContext(ctx)
 			if err != nil {
 				return fmt.Errorf("Error updating fireclient (%d - retries left): %v", firestoreRetriesNumber-i, err.Error())
 			}
@@ -281,8 +281,8 @@ func editEntityInFirestore(ctx context.Context, fireclient *firestore.Client, co
 	return fmt.Errorf("Exceed retries number for updating '%v' in the '%v' collection, Error: %v", entityID, collectionName, err.Error())
 }
 
-// deleteEntityFromFirestore - delets any entity from the firestore collection with retries
-func deleteEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, collectionName, entityID string) (*firestore.WriteResult, error) {
+// DeleteEntityFromFirestore - delets any entity from the firestore collection with retries
+func DeleteEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, collectionName, entityID string) (*firestore.WriteResult, error) {
 	var result *firestore.WriteResult
 
 	firestoreRetriesNumber, err := strconv.Atoi(os.Getenv("FIRESTORE_RETRIES_NUMBER"))
@@ -294,7 +294,7 @@ func deleteEntityFromFirestore(ctx context.Context, fireclient *firestore.Client
 	if entityID == "" {
 		return nil, errors.New("Entity ID is required field for deletion")
 	}
-	if !firestoreCollectionExists(collectionName) {
+	if !FirestoreCollectionExists(collectionName) {
 		return nil, errors.New("Document name does not exist")
 	}
 
@@ -303,7 +303,7 @@ func deleteEntityFromFirestore(ctx context.Context, fireclient *firestore.Client
 		if err != nil {
 			if err.Error() == ClosingTransportError {
 				//recreate fireclient connection
-				_, fireclient, err = getFirestoreAppAndClientWithContext(ctx)
+				_, fireclient, err = GetFirestoreAppAndClientWithContext(ctx)
 				if err != nil {
 					return result, fmt.Errorf("Error updating fireclient (%d - retries left): %v", firestoreRetriesNumber-i, err.Error())
 				}
@@ -323,7 +323,7 @@ func deleteEntityFromFirestore(ctx context.Context, fireclient *firestore.Client
 	return nil, fmt.Errorf("Exceed retries number for deletion %v from %v collection, Error: %v", entityID, collectionName, err.Error())
 }
 
-func getFirestoreAppAndClientWithContext(ctx context.Context) (*firebase.App, *firestore.Client, error) {
+func GetFirestoreAppAndClientWithContext(ctx context.Context) (*firebase.App, *firestore.Client, error) {
 	fireapp, err := firebase.NewApp(ctx, nil)
 	if err != nil {
 		return nil, nil, err
@@ -337,8 +337,8 @@ func getFirestoreAppAndClientWithContext(ctx context.Context) (*firebase.App, *f
 	return fireapp, fireclient, nil
 }
 
-// firestoreCollectionExists checks if collection present in the FirestoreCollectionNames list
-func firestoreCollectionExists(docName string) bool {
+// FirestoreCollectionExists checks if collection present in the FirestoreCollectionNames list
+func FirestoreCollectionExists(docName string) bool {
 	for _, name := range FirestoreCollectionNames {
 		if name == docName {
 			return true
