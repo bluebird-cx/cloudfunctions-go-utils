@@ -29,8 +29,8 @@ type FCShippingSecretData struct {
 	TokenExpirationDate time.Time `json:"token_expiration_date" firestore:"token_expiration_date,omitempty" structs:"token_expiration_date,omitempty"`
 }
 
-// getShippingSecretDataModel - returns Shipping secret data model by ID from DB
-func getShippingSecretDataModel(ctx context.Context, fireclient *firestore.Client, ID string) (FCShippingSecretData, error) {
+// GetShippingSecretDataModel - returns Shipping secret data model by ID from DB
+func GetShippingSecretDataModel(ctx context.Context, fireclient *firestore.Client, ID string) (FCShippingSecretData, error) {
 	dsnap, err := GetEntityFromFirestore(ctx, fireclient, FCShippingSecretDataCollection, ID)
 	if err != nil {
 		return FCShippingSecretData{}, fmt.Errorf("failed to get shipping secret data by ID %v. Error: %v", ID, err.Error())
@@ -50,15 +50,15 @@ func getShippingSecretDataModel(ctx context.Context, fireclient *firestore.Clien
 	return secretData, nil
 }
 
-// getIEAccessToken - return Imprint Engine access token from DB or regenerates it by API
-func getIEAccessToken(ctx context.Context, fireclient *firestore.Client, apiCredentialsID string) (string, error) {
-	secretDataModel, err := getShippingSecretDataModel(ctx, fireclient, apiCredentialsID)
+// GetIEAccessToken - return Imprint Engine access token from DB or regenerates it by API
+func GetIEAccessToken(ctx context.Context, fireclient *firestore.Client, apiCredentialsID string) (string, error) {
+	secretDataModel, err := GetShippingSecretDataModel(ctx, fireclient, apiCredentialsID)
 	if err != nil {
 		return "", fmt.Errorf("failed to get secretDataModel. Error: %v", err.Error())
 	}
 
 	if secretDataModel.TokenExpirationDate.Before(time.Now()) {
-		newToken, err := renewImprintEngineAccessToken(ctx, secretDataModel.SecretName)
+		newToken, err := RenewImprintEngineAccessToken(ctx, secretDataModel.SecretName)
 		if err != nil {
 			return "", fmt.Errorf("failed to get Imprint Engine access token. Error: %v", err.Error())
 		}
@@ -78,7 +78,7 @@ func getIEAccessToken(ctx context.Context, fireclient *firestore.Client, apiCred
 	return secretDataModel.AccessToken, nil
 }
 
-func renewImprintEngineAccessToken(ctx context.Context, tokenSecretName string) (string, error) {
+func RenewImprintEngineAccessToken(ctx context.Context, tokenSecretName string) (string, error) {
 	refreshToken, err := GetSecret(ctx, tokenSecretName)
 	if err != nil {
 		return "", fmt.Errorf("failed to get refresh token from sercet manager. Error: %v", err.Error())
@@ -122,9 +122,9 @@ func renewImprintEngineAccessToken(ctx context.Context, tokenSecretName string) 
 	return ieAuthResponse.AccessToken, nil
 }
 
-// getImprintEngineMNGraphQLClient - returns GraphQL client
-func getImprintEngineMNGraphQLClient(ctx context.Context, fireclient *firestore.Client, apiCredentialsID string) (*graphql.Client, error) {
-	token, err := getIEAccessToken(ctx, fireclient, apiCredentialsID)
+// GetImprintEngineMNGraphQLClient - returns GraphQL client
+func GetImprintEngineMNGraphQLClient(ctx context.Context, fireclient *firestore.Client, apiCredentialsID string) (*graphql.Client, error) {
+	token, err := GetIEAccessToken(ctx, fireclient, apiCredentialsID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get access token. Error: %v", err.Error())
 	}
@@ -144,8 +144,8 @@ func getImprintEngineMNGraphQLClient(ctx context.Context, fireclient *firestore.
 	return client, nil
 }
 
-func getImprintEngineMNRequestConfig(ctx context.Context, fireclient *firestore.Client, orgID, apiCredentialsID string) (PreparedIEOrderData, error) {
-	graphqlClient, err := getImprintEngineMNGraphQLClient(ctx, fireclient, apiCredentialsID)
+func GetImprintEngineMNRequestConfig(ctx context.Context, fireclient *firestore.Client, orgID, apiCredentialsID string) (PreparedIEOrderData, error) {
+	graphqlClient, err := GetImprintEngineMNGraphQLClient(ctx, fireclient, apiCredentialsID)
 	if err != nil {
 		return PreparedIEOrderData{}, fmt.Errorf("failed to get ImprintEngine Client HTTP. Error: %v", err.Error())
 	}
@@ -164,9 +164,11 @@ func getImprintEngineMNRequestConfig(ctx context.Context, fireclient *firestore.
 		AppID:  appID,
 	}
 
-	config.ExternalID, err = strconv.ParseInt(orgID, 10, 64) // parse the value into IE request format
-	if err != nil {
-		return PreparedIEOrderData{}, fmt.Errorf("invalid format of the external ID. Error: %v", err.Error())
+	if orgID != "" {
+		config.ExternalID, err = strconv.ParseInt(orgID, 10, 64) // parse the value into IE request format
+		if err != nil {
+			return PreparedIEOrderData{}, fmt.Errorf("invalid format of the external ID. Error: %v", err.Error())
+		}
 	}
 
 	return config, nil
