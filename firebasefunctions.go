@@ -167,10 +167,6 @@ func AddEntityToFirestore(ctx context.Context, fireclient *firestore.Client, col
 		LogWrite(LogTypeInfo, 0, fmt.Sprintf("FIRESTORE_RETRIES_NUMBER is missing, was set to: %v", firestoreRetriesNumber), "")
 	}
 
-	if !FirestoreCollectionExists(collectionName) {
-		return nil, fmt.Errorf("Collection name '%v' does not exist", collectionName)
-	}
-
 	for i := 0; i < firestoreRetriesNumber; i++ {
 		docRef, _, err = fireclient.Collection(collectionName).Add(ctx, entity)
 		if err == nil {
@@ -209,9 +205,6 @@ func GetEntityFromFirestore(ctx context.Context, fireclient *firestore.Client, c
 
 	if entityID == "" {
 		return nil, errors.New("entity ID is required field for get")
-	}
-	if !FirestoreCollectionExists(collectionName) {
-		return nil, fmt.Errorf("document name '%v' does not exist", collectionName)
 	}
 
 	for i := 0; i < firestoreRetriesNumber; i++ {
@@ -252,9 +245,6 @@ func EditEntityInFirestore(ctx context.Context, fireclient *firestore.Client, co
 	if entityID == "" {
 		return errors.New("Entity ID is required field for edit")
 	}
-	if !FirestoreCollectionExists(collectionName) {
-		return fmt.Errorf("Document name '%v' does not exist", collectionName)
-	}
 
 	for i := 0; i < firestoreRetriesNumber; i++ {
 		//MergeAll expects to use only mapped data
@@ -294,9 +284,6 @@ func DeleteEntityFromFirestore(ctx context.Context, fireclient *firestore.Client
 	if entityID == "" {
 		return nil, errors.New("Entity ID is required field for deletion")
 	}
-	if !FirestoreCollectionExists(collectionName) {
-		return nil, errors.New("Document name does not exist")
-	}
 
 	for i := 0; i < firestoreRetriesNumber; i++ {
 		result, err = fireclient.Collection(collectionName).Doc(entityID).Delete(ctx)
@@ -335,14 +322,4 @@ func GetFirestoreAppAndClientWithContext(ctx context.Context) (*firebase.App, *f
 	}
 
 	return fireapp, fireclient, nil
-}
-
-// FirestoreCollectionExists checks if collection present in the FirestoreCollectionNames list
-func FirestoreCollectionExists(docName string) bool {
-	for _, name := range FirestoreCollectionNames {
-		if name == docName {
-			return true
-		}
-	}
-	return false
 }
