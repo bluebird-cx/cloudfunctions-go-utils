@@ -35,7 +35,8 @@ var (
 func GetFirestoreAppAndClient() (*firebase.App, *firestore.Client, context.Context) {
 
 	ctx := context.Background()
-	fireapp, err := firebase.NewApp(ctx, nil)
+	conf := &firebase.Config{ProjectID: os.Getenv("GCLOUD_PROJECT")}
+	fireapp, err := firebase.NewApp(ctx, conf)
 	if err != nil {
 		LogWrite(LogTypeError2, ErrorCodeFirebase, fmt.Sprintf("Error getting fireapp: %v", err.Error()), "")
 		panic(err)
