@@ -44,7 +44,7 @@ func (pl *Logger) getExecutionFunctionIDFromRequest(httpRequest *http.Request) s
 
 func (pl *Logger) getTraceId(httpRequest *http.Request) string {
 	var trace string
-	if pl.ProjectID != "" {
+	if pl.ProjectID != "" && httpRequest != nil {
 		traceHeader := httpRequest.Header.Get("X-Cloud-Trace-Context")
 		traceParts := strings.Split(traceHeader, "/")
 		if len(traceParts) > 0 && len(traceParts[0]) > 0 {
