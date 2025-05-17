@@ -140,7 +140,7 @@ func (pl *Logger) sendLogs(ctx context.Context, severity logging.Severity, paylo
 	gcpLogger.Log(entry)
 }
 
-// Debug - calls sendLogs with DEBUG severity.
+// Debug - calls sendLogs with 100(DEBUG) severity. Used for BE team
 func (pl *Logger) Debug(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Debug, LogEntryPayload{
@@ -151,7 +151,7 @@ func (pl *Logger) Debug(ctx context.Context, httpRequest *http.Request, message 
 	}, traceID, spanID, sampled)
 }
 
-// Info - calls sendLogs with INFO severity.
+// Info - calls sendLogs with 200(INFO) severity. Used for BE team
 func (pl *Logger) Info(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Info, LogEntryPayload{
@@ -162,7 +162,7 @@ func (pl *Logger) Info(ctx context.Context, httpRequest *http.Request, message s
 	}, traceID, spanID, sampled)
 }
 
-// Notice - calls sendLogs with NOTICE severity.
+// Notice - calls sendLogs with 300(NOTICE) severity. Used for Support team
 func (pl *Logger) Notice(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Notice, LogEntryPayload{
@@ -173,7 +173,7 @@ func (pl *Logger) Notice(ctx context.Context, httpRequest *http.Request, message
 	}, traceID, spanID, sampled)
 }
 
-// Warning - calls sendLogs with WARNING severity.
+// Warning - calls sendLogs with 400(WARNING) severity. Like Error2 informal (the flow is not stopped)
 func (pl *Logger) Warning(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Warning, LogEntryPayload{
@@ -184,7 +184,7 @@ func (pl *Logger) Warning(ctx context.Context, httpRequest *http.Request, messag
 	}, traceID, spanID, sampled)
 }
 
-// Error - calls sendLogs with ERROR severity.
+// Error - calls sendLogs with 500(ERROR) severity. Like Error2 that stops the flow
 func (pl *Logger) Error(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Error, LogEntryPayload{
@@ -195,7 +195,7 @@ func (pl *Logger) Error(ctx context.Context, httpRequest *http.Request, message 
 	}, traceID, spanID, sampled)
 }
 
-// Critical - calls sendLogs with CRITICAL severity.
+// Critical - calls sendLogs with 600(CRITICAL) severity. Like Error1 with fix time 24 hours
 func (pl *Logger) Critical(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Critical, LogEntryPayload{
@@ -206,7 +206,7 @@ func (pl *Logger) Critical(ctx context.Context, httpRequest *http.Request, messa
 	}, traceID, spanID, sampled)
 }
 
-// Emergency - calls sendLogs with EMERGENCY severity.
+// Emergency - calls sendLogs with 800(EMERGENCY) severity. Like Error1 P0 that should be fixed ASAP
 func (pl *Logger) Emergency(ctx context.Context, httpRequest *http.Request, message string, dataObject ...interface{}) {
 	traceID, spanID, sampled := pl.extractTraceSpanInfo(ctx, httpRequest)
 	pl.sendLogs(ctx, logging.Emergency, LogEntryPayload{
