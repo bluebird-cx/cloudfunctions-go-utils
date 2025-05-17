@@ -9,6 +9,8 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/diegosz/go-graphql-client v0.2.1
 	github.com/fatih/structs v1.1.0
+	go.opentelemetry.io/otel v1.24.0
+	go.opentelemetry.io/otel/trace v1.24.0
 	golang.org/x/oauth2 v0.20.0
 	google.golang.org/api v0.180.0
 )
@@ -34,9 +36,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
-	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
-	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
