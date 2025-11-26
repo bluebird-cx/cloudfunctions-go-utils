@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/diegosz/go-graphql-client"
+	"github.com/hasura/go-graphql-client"
 	"github.com/fatih/structs"
 	"golang.org/x/oauth2"
 	"io"
