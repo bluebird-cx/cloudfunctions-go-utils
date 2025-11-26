@@ -7,8 +7,8 @@ require (
 	cloud.google.com/go/logging v1.10.0
 	cloud.google.com/go/secretmanager v1.12.0
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/diegosz/go-graphql-client v0.2.1
 	github.com/fatih/structs v1.1.0
+	github.com/hasura/go-graphql-client v0.15.0
 	golang.org/x/oauth2 v0.20.0
 	google.golang.org/api v0.180.0
 )
@@ -21,6 +21,7 @@ require (
 	cloud.google.com/go/iam v1.1.8 // indirect
 	cloud.google.com/go/longrunning v0.5.7 // indirect
 	cloud.google.com/go/storage v1.40.0 // indirect
+	github.com/coder/websocket v1.8.13 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -30,7 +31,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
-	github.com/klauspost/compress v1.10.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
@@ -49,5 +49,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240513163218-0867130af1f8 // indirect
 	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
-	nhooyr.io/websocket v1.8.6 // indirect
 )
